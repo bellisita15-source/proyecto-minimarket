@@ -1,0 +1,324 @@
+:root {
+    --primary-color: #721306;
+    --accent-color: #e76835;
+    --accent-hover: #dba328;
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #c74816;
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --success-text: #065f46;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --danger-text: #991b1b;
+    --border: #e2e8f0;
+}
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.5;
+}
+.navbar {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0 30px;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+}
+.logo-img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+.logo-texto {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #f0bd4f; /* Color principal para "Mini" y "Flash" (puedes cambiarlo por gris oscuro #334155 si tu fondo es claro) */
+    white-space: nowrap;
+}
+.logo-texto span {
+    color: var(--accent-color); /* Color de acento (#cf6236) para "market" y el signo "!" */
+}
+.nav-menu {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    height: 100%;
+}
+.nav-btn {
+    background: transparent;
+    color: #f3cda3;
+    border: none;
+    padding: 0 15px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    height: 100%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.nav-btn:hover, .nav-btn.active {
+    color: white;
+    background-color: #a36508;
+    border-bottom: 3px solid var(--accent-color);
+}
+.badge {
+    background-color: var(--danger);
+    color: white;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+.btn-auth {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-auth:hover {
+    background-color: var(--accent-hover);
+}
+#app-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    min-height: calc(100vh - 180px);
+}
+.vista {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.view-header {
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 15px;
+}
+.view-header h2 {
+    font-size: 28px;
+    color: var(--primary-color);
+}
+.view-header p {
+    color: var(--text-muted);
+    font-size: 15px;
+}
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
+}
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+.card h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+}
+.card .precio {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--success-text);
+    background-color: var(--success-bg);
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+button {
+    transition: background-color 0.2s, transform 0.1s;
+}
+button:active { transform: scale(0.98); }
+.btn-primary, .btn-success, .btn-danger {
+    width: 100%;
+    padding: 11px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+.btn-primary { background-color: var(--accent-color); }
+.btn-primary:hover { background-color: var(--accent-hover); }
+.btn-success { background-color: var(--success); }
+.btn-success:hover { background-color: #059669; }
+.btn-danger { background-color: var(--danger); }
+.btn-danger:hover { background-color: #dc2626; }
+.input-group {
+    margin-bottom: 18px;
+    text-align: left;
+}
+.input-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--primary-color);
+}
+.input-group input, .input-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: var(--bg-main);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-group input:focus, .input-group select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 30px;
+}
+.carrito-ul {
+    list-style: none;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+}
+.carrito-ul li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.carrito-ul li:last-child { border-bottom: none; }
+.total-bar {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 18px;
+}
+.checkout-payment {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 25px;
+    border-radius: 8px;
+}
+.format-btn { margin-top: 10px; }
+.auth-card {
+    background: white;
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 35px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    text-align: center;
+}
+.auth-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+.auth-switch { margin-top: 15px; font-size: 14px; color: var(--text-muted); }
+.auth-switch span { color: var(--accent-color); cursor: pointer; font-weight: 600; }
+.auth-switch span:hover { text-decoration: underline; }
+.table-responsive {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 15px;
+}
+.custom-table th {
+    background-color: #f1f5f9;
+    color: var(--primary-color);
+    font-weight: 600;
+    padding: 14px;
+    border-bottom: 2px solid var(--border);
+}
+.custom-table td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+}
+.tendencia-widget {
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-bottom: 25px;
+}
+.subida { background-color: var(--success-bg); color: var(--success-text); border-left: 6px solid var(--success); }
+.baja { background-color: var(--danger-bg); color: var(--danger-text); border-left: 6px solid var(--danger); }
+.error-message { color: var(--danger); font-size: 14px; margin-top: 10px; font-weight: 600; }
+.footer { text-align: center; padding: 25px; color: var(--text-muted); font-size: 14px; margin-top: 40px; border-top: 1px solid var(--border); }
+.card-img-container {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #f1f5f9;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.producto-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+.card:hover .producto-img {
+    transform: scale(1.05);
+}
+@media (max-width: 768px) {
+    .checkout-layout, .grid-layout { grid-template-columns: 1fr; }
+    .navbar { height: auto; flex-direction: column; padding: 15px; gap: 15px; }
+    .nav-menu { flex-wrap: wrap; justify-content: center; }
+    .nav-btn { height: 45px; }
+}

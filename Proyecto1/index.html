@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniMarket Flash - Panel de Gestión y Ventas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+    <div class="logo-texto">
+    Minimarket<span> Flash<span>!</span>
+</div>
+        <div class="nav-menu">
+            <button id="navInicio" class="nav-btn active">🛒 Tienda</button>
+            <button id="navCarrito" class="nav-btn">🛍️ Carrito <span id="badgeCarrito" class="badge">0</span></button>
+            <button id="btnInventario" class="nav-btn admin-element">📦 Inventario</button>
+            <button id="btnUsuarios" class="nav-btn admin-element">👥 Usuarios</button>
+            <button id="btnReportes" class="nav-btn admin-element">📊 Panel Ventas</button>
+        </div>
+        <div class="nav-auth">
+            <button id="btnAuthNav" class="btn-auth">Iniciar Sesión</button>
+        </div>
+    </nav>
+
+    <main id="app-container">
+
+        <section id="vista-inicio" class="vista">
+            <div class="view-header">
+                <h2>Catálogo de Productos</h2>
+                <p>Explora nuestras ofertas disponibles en tiempo real.</p>
+            </div>
+            <div id="grid-productos" class="grid-layout"></div>
+        </section>
+
+        <section id="vista-auth" class="vista">
+            <div id="card-login" class="auth-card">
+                <h2>Iniciar Sesión</h2>
+                <p class="auth-subtitle">Ingresa tus credenciales para operar</p>
+                <div class="input-group">
+                    <label for="usuario">Usuario administrativo o cliente</label>
+                    <input type="text" id="usuario" placeholder="Ej: admin o cliente1">
+                </div>
+                <div class="input-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="••••••••">
+                </div>
+                <button id="btnIngresar" class="btn-primary">Ingresar al Sistema</button>
+                <p class="auth-switch">¿No tienes cuenta? <span id="linkRegistro">Regístrate aquí</span></p>
+                <p id="errorLogin" class="error-message" role="alert"></p>
+            </div>
+
+            <div id="card-registro" class="auth-card" style="display:none;">
+                <h2>Crear Cuenta</h2>
+                <p class="auth-subtitle">Regístrate para realizar compras y ver facturas</p>
+                <div class="input-group">
+                    <label for="nuevoUser">Nombre de Usuario</label>
+                    <input type="text" id="nuevoUser" placeholder="Nombre único">
+                </div>
+                <div class="input-group">
+                    <label for="nuevoPass">Contraseña Segura</label>
+                    <input type="password" id="nuevoPass" placeholder="Mínimo 4 caracteres">
+                </div>
+                <div class="input-group">
+                    <label for="rol">Tipo de Perfil</label>
+                    <select id="rol">
+                        <option value="cliente">Cliente (Comprador)</option>
+                        <option value="admin">Administrador del Sistema</option>
+                    </select>
+                </div>
+                <button id="btnRegistrar" class="btn-primary">Finalizar Registro</button>
+                <p class="auth-switch">¿Ya tienes cuenta? <span id="linkVolverLogin">Inicia sesión</span></p>
+            </div>
+        </section>
+
+        <section id="vista-inventario" class="vista">
+            <div class="view-header">
+                <h2>Control de Inventario</h2>
+                <p>Agrega nuevos productos al flujo comercial del sistema.</p>
+            </div>
+            <div class="crud-container">
+                <div class="form-card">
+                    <h3>Registrar Producto</h3>
+                    <div class="input-group">
+                        <label for="nombre">Nombre del Artículo</label>
+                        <input type="text" id="nombre" placeholder="Ej: Arroz Integral 1kg">
+                    </div>
+                    <div class="input-group">
+                        <label for="precio">Precio de Venta ($)</label>
+                        <input type="number" id="precio" step="0.01" placeholder="0.00">
+                    </div>
+                    <button id="btnGuardarProducto" class="btn-success">Añadir al Stock</button>
+                    <p id="mensajeFeedback" role="alert"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="vista-usuarios" class="vista">
+            <div class="view-header">
+                <h2>Control de Usuarios</h2>
+                <p>Listado dinámico de cuentas registradas en la aplicación.</p>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Rol Asignado</th>
+                            <th>Permisos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaUsuariosBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="vista-compras" class="vista">
+            <div class="view-header">
+                <h2>Resumen de Compra & Facturación</h2>
+            </div>
+            <div class="checkout-layout">
+                <div class="checkout-items">
+                    <h3>Artículos Seleccionados</h3>
+                    <ul id="listaCarrito" class="carrito-ul"></ul>
+                    <div class="total-bar">
+                        <span>Total General:</span>
+                        <span class="total-monto">$<span id="totalMonto">0.00</span></span>
+                    </div>
+                </div>
+                
+                <div class="checkout-payment">
+                    <h3>Datos de Pago Obligatorios</h3>
+                    <div class="input-group">
+                        <label for="facturaNombre">Nombre Completo / Razón Social</label>
+                        <input type="text" id="facturaNombre" placeholder="Nombre en la factura">
+                    </div>
+                    <div class="input-group">
+                        <label for="facturaIdentificacion">Documento de Identidad (DNI/NIT)</label>
+                        <input type="text" id="facturaIdentificacion" placeholder="Número de identificación">
+                    </div>
+                    <div class="input-group">
+                        <label for="medioPago">Seleccione un Medio de Pago</label>
+                        <select id="medioPago">
+                            <option value="Tarjeta de Crédito">💳 Tarjeta de Crédito / Débito</option>
+                            <option value="Transferencia Bancaria">🏦 Transferencia Inmediata (PSE)</option>
+                            <option value="Efectivo">💵 Pago en Efectivo contra entrega</option>
+                        </select>
+                    </div>
+                    <button id="btnPagar" class="btn-success format-btn">Confirmar Compra y Procesar Factura</button>
+                    <button id="btnVaciarCarrito" class="btn-danger format-btn">Vaciar Carrito</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="vista-reportes" class="vista">
+            <div class="view-header">
+                <h2>Auditoría de Ventas y Rendimiento</h2>
+                <p>Monitoreo algorítmico del incremento o decremento comercial de la tienda.</p>
+            </div>
+            
+            <div id="widgetTendencia" class="tendencia-widget"></div>
+            
+            <h3>Historial de Facturas Emitidas</h3>
+            <div class="table-responsive">
+                <table class="custom-table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID Factura</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Medio de Pago</th>
+                            <th>Detalle de Items</th>
+                            <th>Total Cobrado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historialVentasBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 MiniMarket Flash - Evidencia de Diseño Frontend Usable (GA6).</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
