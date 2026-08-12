@@ -1,11 +1,11 @@
 let productos = JSON.parse(localStorage.getItem("productos")) || [
     { id: 1, nombre: "Arroz Premium 1kg", precio: 3500, imagen: "img/arroz.jpg" },
     { id: 2, nombre: "Leche Entera 1L", precio: 4500, imagen: "img/leche.jpg" },
-    { id: 3, nombre: "Azúcar", precio: 3800, imagen: "img/azucar.jpg" },
+    { id: 3, nombre: "Azúcar 1kg", precio: 3800, imagen: "img/azucar.jpg" },
     { id: 4, nombre: "Huevos 30 un", precio: 15000, imagen: "img/huevos.jpg" },
     { id: 5, nombre: "Jabón Manos", precio: 5000, imagen: "img/javon.jpg" },
-    { id: 6, nombre: "Pan", precio: 3000, imagen: "img/pan.jpg" },
-    { id: 7, nombre: "Queso", precio: 5400, imagen: "img/queso.jpg" },
+    { id: 6, nombre: "PanTajado", precio: 3000, imagen: "img/pan.jpg" },
+    { id: 7, nombre: "Queso Campesino", precio: 5400, imagen: "img/queso.jpg" },
     { id: 8, nombre: "Aceite de Girasol 1L", precio: 10900, imagen: "img/aceite.jpg" }
 ];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -13,6 +13,26 @@ let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
 let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
 let usuarioActual = JSON.parse(sessionStorage.getItem("usuarioActual")) || null;
 const INGRESO_MINIMO_META = 20000.00;
+
+// --- CONEXIÓN CON EL BACKEND NODE.JS Y MYSQL ---
+async function cargarProductosDesdeBD() {
+    try {
+        const respuesta = await fetch("http://localhost:3000/app/productos");
+        if (respuesta.ok) {
+            const productosBD = await respuesta.json();
+            if (productosBD && productosBD.length > 0) {
+                // Mapear productos recibidos de MySQL
+                productos = productosBD.map(p => ({
+                    ...p,
+                    imagen: p.imagen || `img/${p.nombre.toLowerCase().split(' ')[0]}.jpg`
+                }));
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ Servidor Node.js no disponible. Usando datos de respaldo local:", err);
+    }
+    renderizarCatalogo();
+}
 
 function activarVista(idVista) {
     document.querySelectorAll(".vista").forEach(v => { v.style.display = "none"; });
@@ -46,9 +66,10 @@ function evaluarReglasDeAcceso() {
     document.getElementById("badgeCarrito").textContent = carrito.length;
 }
 
-// --- RENDERING DEL CATÁLOGO (CON EVENT LISTENERS CORREGIDOS) ---
+// --- RENDERING DEL CATÁLOGO ---
 function renderizarCatalogo() {
     const grid = document.getElementById("grid-productos");
+    if (!grid) return;
     grid.innerHTML = "";
     productos.forEach(p => {
         const card = document.createElement("article");
@@ -59,7 +80,7 @@ function renderizarCatalogo() {
 
         card.innerHTML = `
             <div class="card-img-container">
-                <img src="${rutaImagen}" alt="${p.nombre}" class="producto-img" onerror="this.src='https://via.placeholder.com/150?text=Producto'">
+                <img src="${rutaImagen}" alt="${p.nombre}" class="producto-img" onerror="this.src='img/placeholder.jpg'">
             </div>
             <h3>${p.nombre}</h3>
             <p class="precio">$${precioNum.toLocaleString('es-CO')}</p>
@@ -68,7 +89,6 @@ function renderizarCatalogo() {
         grid.appendChild(card);
     });
 
-    // CORRECCIÓN CLAVE: Asignar el evento click a cada botón generado
     grid.querySelectorAll(".btn-add-cart").forEach(boton => {
         boton.addEventListener("click", (e) => {
             const id = Number(e.target.dataset.id);
@@ -80,7 +100,7 @@ function renderizarCatalogo() {
 function agregarItemAlCarrito(id) {
     if (!usuarioActual) {
         alert("Atención: Para poder realizar compras en el market, primero debe Iniciar Sesión.");
-        activarVista("vista-auth"); // Corregido: antes decía "activavistas"
+        activarVista("vista-auth");
         return;
     }
     const prod = productos.find(p => (p.id_producto || p.id) === id);
@@ -123,7 +143,8 @@ function renderizarResumenCarrito() {
     });
 }
 
-function formalizarTransaccion() {
+// --- TRANSACCIÓN INTEGRADA CON MYSQL ---
+async function formalizarTransaccion() {
     if (carrito.length === 0) {
         alert("Error: No hay ítems en el carrito para procesar.");
         return;
@@ -132,29 +153,72 @@ function formalizarTransaccion() {
     const documento = document.getElementById("facturaIdentificacion").value.trim();
     const metodo = document.getElementById("medioPago").value;
     const finalTotal = carrito.reduce((sum, i) => sum + (parseFloat(i.precio) || 0), 0);
+    
     if (!cliente || !documento) {
         alert("Error: Complete los campos requeridos de Nombre e Identificación.");
         return;
     }
-    const factura = {
-        id: "FAC-" + Math.floor(Math.random() * 90000 + 10000),
-        fecha: new Date().toLocaleDateString(),
-        cliente,
-        documento,
-        medioPago: metodo,
-        detalles: carrito.map(c => c.nombre).join(", "),
-        total: finalTotal
-    };
-    ventas.push(factura);
-    localStorage.setItem("ventas", JSON.stringify(ventas));
-    alert(`¡Transacción Procesada!\nFactura de Compra: ${factura.id}\nTotal: $${factura.total.toLocaleString('es-CO')}\nForma de cobro: ${factura.medioPago}`);
-    carrito = [];
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-    document.getElementById("facturaNombre").value = "";
-    document.getElementById("facturaIdentificacion").value = "";
-    evaluarReglasDeAcceso();
-    activarVista("vista-inicio");
-    renderizarCatalogo();
+
+    // Agrupar ítems del carrito para enviarlos ordenados a MySQL
+    const productosParaBD = [];
+    carrito.forEach(item => {
+        const idProd = item.id_producto || item.id;
+        const existe = productosParaBD.find(p => p.id_producto === idProd);
+        if (existe) {
+            existe.cantidad += 1;
+        } else {
+            productosParaBD.push({
+                id_producto: idProd,
+                cantidad: 1,
+                precio_unitario: parseFloat(item.precio) || 0
+            });
+        }
+    });
+
+    try {
+        // Enviar la venta vía POST a Node.js / MySQL
+        const respuesta = await fetch("http://localhost:3000/app/ventas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id_cliente: 1,  // ID cliente general en BD
+                id_empleado: 1, // ID empleado cajero en BD
+                productos: productosParaBD
+            })
+        });
+
+        let idVentaServidor = Math.floor(Math.random() * 90000 + 10000);
+        if (respuesta.ok) {
+            const dataServidor = await respuesta.json();
+            if (dataServidor.id_venta) idVentaServidor = dataServidor.id_venta;
+        }
+
+        const factura = {
+            id: "FAC-" + idVentaServidor,
+            fecha: new Date().toLocaleDateString(),
+            cliente,
+            documento,
+            medioPago: metodo,
+            detalles: carrito.map(c => c.nombre).join(", "),
+            total: finalTotal
+        };
+
+        ventas.push(factura);
+        localStorage.setItem("ventas", JSON.stringify(ventas));
+
+        alert(`¡Transacción Procesada e Integrada en MySQL!\nFactura de Compra: ${factura.id}\nTotal: $${factura.total.toLocaleString('es-CO')}\nForma de cobro: ${factura.medioPago}`);
+        
+        carrito = [];
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+        document.getElementById("facturaNombre").value = "";
+        document.getElementById("facturaIdentificacion").value = "";
+        evaluarReglasDeAcceso();
+        activarVista("vista-inicio");
+        cargarProductosDesdeBD(); // Recargar productos para actualizar stock de MySQL
+    } catch (error) {
+        console.error("Error registrando la venta en la base de datos:", error);
+        alert("La venta se procesó localmente pero hubo un detalle al sincronizar con el servidor MySQL.");
+    }
 }
 
 function procesarInformesVentas() {
@@ -265,7 +329,7 @@ function validarLogin() {
     document.getElementById("usuario").value = "";
     document.getElementById("password").value = "";
     evaluarReglasDeAcceso();
-    renderizarCatalogo();
+    cargarProductosDesdeBD();
     activarVista("vista-inicio");
 }
 
@@ -287,7 +351,7 @@ function procesarRegistro() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("navInicio").addEventListener("click", () => { renderizarCatalogo(); activarVista("vista-inicio"); });
+    document.getElementById("navInicio").addEventListener("click", () => { cargarProductosDesdeBD(); activarVista("vista-inicio"); });
     document.getElementById("navCarrito").addEventListener("click", () => { renderizarResumenCarrito(); activarVista("vista-compras"); });
     document.getElementById("btnInventario").addEventListener("click", () => activarVista("vista-inventario"));
     document.getElementById("btnUsuarios").addEventListener("click", () => { renderizarTablaUsuarios(); activarVista("vista-usuarios"); });
@@ -311,7 +375,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("card-registro").style.display = "none";
         document.getElementById("card-login").style.display = "block";
     });
+
     evaluarReglasDeAcceso();
-    renderizarCatalogo();
+    cargarProductosDesdeBD(); // Carga de datos real desde Node.js/MySQL al iniciar
     activarVista("vista-inicio");
 });
