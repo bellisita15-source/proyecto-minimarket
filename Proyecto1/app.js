@@ -6,54 +6,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Ruta 1: Consultar productos de la BD
+// 1. Obtener todos los productos
 app.get('/app/productos', async (req, res) => {
   try {
-    const [productos] = await db.query('SELECT * FROM productos');
-    res.json(productos);
-  } catch (error) {
-    console.error("Error en BD:", error);
-    res.status(500).json({ error: 'Error consultando la base de datos' });
+    const [r] = await db.query('SELECT * FROM productos');
+    res.json(r);
+  } catch (e) {
+    res.status(500).json(e);
   }
 });
 
-// Ruta 2: Registrar una venta en la BD
-app.post('/app/ventas', async (req, res) => {
-  const { id_cliente, id_empleado, productos } = req.body;
-  const connection = await db.getConnection();
-
+// 2. Buscar producto por ID
+app.get('/app/productos/:id', async (req, res) => {
   try {
-    await connection.beginTransaction();
-
-    const [resVenta] = await connection.query(
-      'INSERT INTO ventas (id_cliente, id_empleado) VALUES (?, ?)',
-      [id_cliente || 1, id_empleado || 1]
-    );
-    const id_venta = resVenta.insertId;
-
-    for (const item of productos) {
-      await connection.query(
-        'INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
-        [id_venta, item.id_producto, item.cantidad, item.precio_unitario]
-      );
-
-      await connection.query(
-        'UPDATE productos SET stock = stock - ? WHERE id_producto = ?',
-        [item.cantidad, item.id_producto]
-      );
-    }
-
-    await connection.commit();
-    res.status(201).json({ mensaje: 'Venta registrada con éxito', id_venta });
-  } catch (error) {
-    await connection.rollback();
-    res.status(500).json({ error: 'Error al registrar la venta', detalle: error.message });
-  } finally {
-    connection.release();
+    const [r] = await db.query('SELECT * FROM productos WHERE id_producto = ?', [req.params.id]);
+    if (!r.length) return res.status(404).json({ mensaje: 'Producto no encontrado' });
+    res.json(r[0]);
+  } catch (e) {
+    res.status(500).json(e);
   }
 });
 
 const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log('🚀 Servidor ejecutándose en http://localhost:' + PORT));
