@@ -1,8 +1,6 @@
--- 1. CREAR BASE DE DATOS Y USARLA
 CREATE DATABASE IF NOT EXISTS minimarket DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE minimarket;
 
--- 2. ELIMINAR TABLAS SI EXISTEN (PARA EVITAR CONFLICTOS)
 DROP TABLE IF EXISTS detalle_venta;
 DROP TABLE IF EXISTS ventas;
 DROP TABLE IF EXISTS productos;
@@ -10,8 +8,8 @@ DROP TABLE IF EXISTS empleados;
 DROP TABLE IF EXISTS clientes;
 DROP TABLE IF EXISTS proveedores;
 DROP TABLE IF EXISTS categorias;
+DROP TABLE IF EXISTS usuarios;
 
--- 3. CREAR TABLAS
 CREATE TABLE categorias (
   id_categoria INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -39,11 +37,20 @@ CREATE TABLE empleados (
   salario DECIMAL(10,2)
 );
 
+CREATE TABLE usuarios (
+  id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  correo VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  rol VARCHAR(20) DEFAULT 'cliente'
+);
+
 CREATE TABLE productos (
   id_producto INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
   precio DECIMAL(10,2) NOT NULL,
   stock INT DEFAULT 0,
+  imagen_url VARCHAR(255) DEFAULT 'default.png',
   id_categoria INT,
   id_proveedor INT,
   FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
@@ -69,7 +76,6 @@ CREATE TABLE detalle_venta (
   FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
 
--- 4. INSERTAR DATOS DE PRUEBA
 INSERT INTO categorias (nombre, descripcion) VALUES
 ('Lácteos y Huevos', 'Derivados de la leche y huevos frescos'),
 ('Panadería y Galletas', 'Pan fresco, tostadas y galletas'),
@@ -88,12 +94,15 @@ INSERT INTO empleados (nombre, cargo, salario) VALUES
 ('Ana Martínez', 'Cajera', 1300000.00),
 ('Carlos Rodríguez', 'Administrador', 2100000.00);
 
-INSERT INTO productos (nombre, precio, stock, id_categoria, id_proveedor) VALUES
-('Arroz Premium 1kg', 3500.00, 100, 3, 2),
-('Leche Entera 1L', 4500.00, 80, 1, 1),
-('Azúcar 1kg', 3800.00, 90, 3, 2),
-('Huevos 30 un', 15000.00, 40, 1, 1),
-('Jabón Manos', 5000.00, 50, 3, 2),
-('PanTajado', 3000.00, 30, 2, 2),
-('Queso Campesino', 5400.00, 25, 1, 1),
-('Aceite de Girasol 1L', 10900.00, 60, 3, 2);
+INSERT INTO usuarios (nombre, correo, password, rol) VALUES
+('Admin SENA', 'admin@minimarket.com', '123456', 'admin');
+
+INSERT INTO productos (nombre, precio, stock, imagen_url, id_categoria, id_proveedor) VALUES
+('Arroz Premium 1kg', 3500.00, 100, 'arroz.jpg', 3, 2),
+('Leche Entera 1L', 4500.00, 80, 'leche.jpg', 1, 1),
+('Azúcar 1kg', 3800.00, 90, 'azucar.jpg', 3, 2),
+('Huevos 30 un', 15000.00, 40, 'huevos.jpg', 1, 1),
+('Jabón Manos', 5000.00, 50, 'javon.jpg', 3, 2),
+('PanTajado', 3000.00, 30, 'pan.jpg', 2, 2),
+('Queso Campesino', 5400.00, 25, 'queso.jpg', 1, 1),
+('Aceite de Girasol 1L', 10900.00, 60, 'aceite.jpg', 3, 2);
